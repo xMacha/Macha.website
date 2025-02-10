@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strona Machy</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@octokit/oauth-login"></script>
     <style>
         body { text-align: center; font-family: Arial, sans-serif; background: #222; color: white; }
-        canvas { display: block; margin: auto; }
+        canvas { display: block; margin: auto; background: black; }
         #login-btn { padding: 10px 20px; font-size: 18px; margin-top: 20px; }
     </style>
 </head>
@@ -16,7 +15,7 @@
     <h1>Witaj na stronie Machy</h1>
     <button id="login-btn">Zaloguj się przez GitHub</button>
     <p><a href="https://discord.com/" target="_blank">Discord</a> | <a href="https://github.com/" target="_blank">GitHub</a> | <a href="https://youtube.com/" target="_blank">YouTube</a></p>
-    <div id="game-container"></div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
 
     <script>
         document.getElementById('login-btn').addEventListener('click', async () => {
@@ -25,25 +24,43 @@
             alert('Zalogowano przez GitHub! Token: ' + token);
         });
 
-        // Prosty symulator driftu w Three.js
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const car = new THREE.Mesh(geometry, material);
-        scene.add(car);
-
-        camera.position.z = 5;
-        function animate() {
-            requestAnimationFrame(animate);
-            car.rotation.y += 0.05;
-            renderer.render(scene, camera);
+        // Prosty symulator driftu w 2D
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let car = { x: 400, y: 300, angle: 0, speed: 0 };
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowUp") car.speed = 2;
+            if (e.key === "ArrowDown") car.speed = -2;
+            if (e.key === "ArrowLeft") car.angle -= 0.1;
+            if (e.key === "ArrowRight") car.angle += 0.1;
+        });
+        
+        document.addEventListener("keyup", (e) => {
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") car.speed = 0;
+        });
+        
+        function update() {
+            car.x += Math.cos(car.angle) * car.speed;
+            car.y += Math.sin(car.angle) * car.speed;
         }
-        animate();
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(car.x, car.y);
+            ctx.rotate(car.angle);
+            ctx.fillStyle = "red";
+            ctx.fillRect(-15, -10, 30, 20);
+            ctx.restore();
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
     </script>
 </body>
 </html>
