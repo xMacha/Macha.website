@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>O Mnie - Macha</title>
+  <!-- Import czcionki Lexend (700 - bold) -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700&display=swap" rel="stylesheet">
   <style>
     /* Reset i podstawowe style */
     * {
@@ -13,14 +15,13 @@
     body {
       font-family: sans-serif;
       color: #eee;
-      /* Ustawiamy tło korzystając z wersji raw obrazu z GitHuba */
+      /* Tło pobrane z GitHuba (raw) */
       background: url('https://raw.githubusercontent.com/xMacha/Macha.website/main/tlo.png') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
-      /* Niestandardowy kursor */
       cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
     }
-    /* Overlay dla powiadomienia o aktywacji mediów */
+    /* Overlay – powiadomienie o aktywacji mediów */
     #media-permission-overlay {
       position: fixed;
       top: 0;
@@ -69,6 +70,12 @@
     main {
       padding: 20px;
     }
+    /* Opis – czcionka Lexend, bold, odstęp od przycisków */
+    #about p {
+      font-family: 'Lexend', sans-serif;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
     /* Stylizacja zdjęcia profilowego */
     #profile-pic {
       display: block;
@@ -78,12 +85,14 @@
       object-fit: cover;
       border-radius: 50%;
       border: 3px solid #0af;
-      transition: transform 0.3s ease;
+      /* Początkowy efekt – transformacja będzie modyfikowana przez JS */
+      transform: scale(1);
+      transition: transform 0.2s ease;
     }
-    #profile-pic:hover {
-      transform: scale(1.1);
+    /* Stylizacja przycisków – odstęp od opisu */
+    #buttons {
+      margin-top: 10px;
     }
-    /* Stylizacja przycisków */
     #buttons button {
       margin: 5px;
       padding: 10px 15px;
@@ -99,13 +108,33 @@
       background: #08c;
       transform: scale(1.05);
     }
-    /* Efekt "unoszenia" przycisków */
+    /* Efekt unoszenia przycisków */
     #buttons {
       animation: float 3s ease-in-out infinite;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-5px); }
+    }
+    /* Sekcja przycisku następnej piosenki */
+    #music-controls {
+      text-align: center;
+      margin-top: 15px;
+    }
+    #music-controls button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background: #0af;
+      color: #222;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    #music-controls button:hover {
+      background: #08c;
+      transform: scale(1.05);
     }
     /* Stylizacja elementu canvas dla gry Pong */
     #pong {
@@ -128,7 +157,7 @@
   </style>
 </head>
 <body>
-  <!-- Nakładka powiadamiająca o konieczności aktywacji mediów -->
+  <!-- Overlay aktywujący odtwarzanie mediów -->
   <div id="media-permission-overlay">
     Kliknij, aby aktywować odtwarzanie wideo i dźwięku
   </div>
@@ -147,8 +176,12 @@
           <button onclick="window.location.href='mailto:piterek771@gmail.com'">Email</button>
           <button onclick="window.open('https://github.com/xMacha', '_blank')">GitHub</button>
           <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank')">YouTube</button>
+          <button onclick="window.open('https://steamcommunity.com/id/Machaxx21212/', '_blank')">Steam</button>
+          <button onclick="window.open('https://www.roblox.com/users/893300588/profile', '_blank')">Roblox</button>
+          <button onclick="copyDiscord()">Discord</button>
         </div>
       </section>
+      
       <!-- Sekcja z grą Pong -->
       <section id="game">
         <h2>Gra Pong</h2>
@@ -158,23 +191,63 @@
         </div>
         <canvas id="pong" width="800" height="400"></canvas>
       </section>
+      
+      <!-- Kontrola zmiany piosenki -->
+      <section id="music-controls">
+        <button id="next-song">Następna piosenka</button>
+      </section>
     </main>
     <footer>
       <p>&copy; 2025 Macha</p>
     </footer>
   </div>
   
-  <!-- Ukryty element iframe dla mediów, src zostanie ustawione po aktywacji -->
+  <!-- Ukryty element iframe dla muzyki – src ustawiany po aktywacji -->
   <iframe id="bg-music" width="0" height="0" frameborder="0" allow="autoplay"></iframe>
   
   <script>
-    // Po kliknięciu w overlay ukrywamy go i ustawiamy src iframe, aby rozpocząć odtwarzanie mediów
+    // Tablica utworów (YouTube IDs) i indeks aktualnego utworu
+    const songs = ["-G2prPDrU5U", "TaPzISh5shw", "WmYMN3zSz70"];
+    let currentSongIndex = 0;
+    
+    // Funkcja ustawiająca źródło iframe z muzyką
+    function setSong(index) {
+      const videoId = songs[index];
+      const src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&loop=1&playlist=" + videoId;
+      document.getElementById("bg-music").src = src;
+    }
+    
+    // Po kliknięciu overlay aktywujemy media
     document.getElementById('media-permission-overlay').addEventListener('click', function() {
       this.style.display = 'none';
-      document.getElementById('bg-music').src = "https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls";
+      setSong(currentSongIndex);
     });
     
-    // Skrypt gry Pong
+    // Obsługa przycisku "Następna piosenka"
+    document.getElementById("next-song").addEventListener("click", function() {
+      currentSongIndex = (currentSongIndex + 1) % songs.length;
+      setSong(currentSongIndex);
+    });
+    
+    // Funkcja kopiująca Discord username do schowka
+    function copyDiscord() {
+      navigator.clipboard.writeText("___macha").then(function() {
+        alert("Discord username skopiowany: ___macha");
+      }, function(err) {
+        alert("Błąd przy kopiowaniu: " + err);
+      });
+    }
+    
+    // Symulacja efektu "głośności" – profilowe pulsuje (na podstawie funkcji sinusoidalnej)
+    function simulateVolume() {
+      const t = Date.now() / 500; // regulacja prędkości pulsowania
+      const audioLevel = (Math.sin(t) + 1) / 2; // wartość 0-1
+      const scale = 1 + 0.1 * audioLevel; // skala od 1 do 1.1
+      document.getElementById('profile-pic').style.transform = 'scale(' + scale + ')';
+    }
+    setInterval(simulateVolume, 100);
+    
+    // Skrypt gry Pong (bez zmian)
     const canvas = document.getElementById("pong");
     const ctx = canvas.getContext("2d");
 
