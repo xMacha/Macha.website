@@ -8,27 +8,52 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #222;
       color: #eee;
-      /* Niestandardowy kursor – SVG z emotikoną "🖕" */
+      /* Usuwamy statyczne tło, bo użyjemy pseudo-elementu do efektów */
+      /* cursor – niestandardowy kursor: */
       cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
     }
+    
+    /* Pseudo-element z tłem i efektami */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('zasoby/tlo.png') no-repeat center center fixed;
+      background-size: cover;
+      filter: brightness(0.7) blur(2px);
+      z-index: -1;
+      animation: zoomBackground 20s ease-in-out infinite alternate;
+    }
+    
+    @keyframes zoomBackground {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+    
     header, footer {
       text-align: center;
       padding: 20px;
     }
+    
     main {
       padding: 20px;
       max-width: 900px;
       margin: 0 auto;
     }
+    
     a {
       color: #0af;
       text-decoration: none;
     }
+    
     a:hover {
       text-decoration: underline;
     }
+    
     /* Stylizacja zdjęcia profilowego */
     #profile-pic {
       display: block;
@@ -38,6 +63,7 @@
       object-fit: cover;
       border-radius: 50%;
     }
+    
     /* Stylizacja przycisków w sekcji "O mnie" */
     #buttons button {
       margin: 5px;
@@ -49,9 +75,11 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    
     #buttons button:hover {
       background: #08c;
     }
+    
     /* Stylizacja elementu canvas dla gry Pong */
     #pong {
       display: block;
@@ -59,8 +87,17 @@
       background: #000;
       border: 2px solid #fff;
     }
+    
     /* Stylizacja suwaka trudności */
-    #difficulty-container {\n      text-align: center;\n      margin-bottom: 10px;\n    }\n    #difficulty-slider {\n      vertical-align: middle;\n    }\n  </style>
+    #difficulty-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    #difficulty-slider {
+      vertical-align: middle;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -87,6 +124,7 @@
       </div>
       <canvas id="pong" width="800" height="400"></canvas>
     </section>
+    
     <!-- Osadzenie muzyki z YouTube -->
     <iframe width="0" height="0" src="https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls" frameborder="0" allow="autoplay"></iframe>
   </main>
