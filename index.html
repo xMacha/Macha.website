@@ -1,66 +1,234 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona Machy</title>
-    <script src="https://cdn.jsdelivr.net/npm/@octokit/oauth-login"></script>
-    <style>
-        body { text-align: center; font-family: Arial, sans-serif; background: #222; color: white; }
-        canvas { display: block; margin: auto; background: black; }
-        #login-btn { padding: 10px 20px; font-size: 18px; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>O Mnie - Macha</title>
+  <style>
+    /* Ustawienia ogólne */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #222;
+      color: #eee;
+      /* Niestandardowy kursor – SVG z emotikoną "🖕" */
+      cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
+    }
+    header, footer {
+      text-align: center;
+      padding: 20px;
+    }
+    main {
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    a {
+      color: #0af;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    /* Stylizacja elementu canvas dla gry Pong */
+    #pong {
+      display: block;
+      margin: 20px auto;
+      background: #000;
+      border: 2px solid #fff;
+    }
+  </style>
 </head>
 <body>
-    <h1>Witaj na stronie Machy</h1>
-    <button id="login-btn">Zaloguj się przez GitHub</button>
-    <p><a href="https://discord.com/" target="_blank">Discord</a> | <a href="https://github.com/" target="_blank">GitHub</a> | <a href="https://youtube.com/" target="_blank">YouTube</a></p>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <header>
+    <h1>O Mnie - Macha</h1>
+  </header>
+  <main>
+    <!-- Sekcja "O mnie" -->
+    <section id="about">
+      <p>
+        Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.
+      </p>
+      <ul>
+        <li>Email: <a href="mailto:piterek771@gmail.com">piterek771@gmail.com</a></li>
+        <li>GitHub: <a href="https://github.com/xMacha" target="_blank">https://github.com/xMacha</a></li>
+        <li>YouTube: <a href="https://www.youtube.com/@Macha_PL" target="_blank">https://www.youtube.com/@Macha_PL</a></li>
+      </ul>
+    </section>
 
-    <script>
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const login = new OctokitOAuthLogin({ clientId: 'YOUR_GITHUB_CLIENT_ID' });
-            const token = await login.getAccessToken();
-            alert('Zalogowano przez GitHub! Token: ' + token);
-        });
+    <!-- Sekcja z grą Pong -->
+    <section id="game">
+      <h2>Gra Pong</h2>
+      <canvas id="pong" width="800" height="400"></canvas>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2025 Macha</p>
+  </footer>
 
-        // Prosty symulator driftu w 2D
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        let car = { x: 400, y: 300, angle: 0, speed: 0 };
-        
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowUp") car.speed = 2;
-            if (e.key === "ArrowDown") car.speed = -2;
-            if (e.key === "ArrowLeft") car.angle -= 0.1;
-            if (e.key === "ArrowRight") car.angle += 0.1;
-        });
-        
-        document.addEventListener("keyup", (e) => {
-            if (e.key === "ArrowUp" || e.key === "ArrowDown") car.speed = 0;
-        });
-        
-        function update() {
-            car.x += Math.cos(car.angle) * car.speed;
-            car.y += Math.sin(car.angle) * car.speed;
-        }
-        
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            ctx.translate(car.x, car.y);
-            ctx.rotate(car.angle);
-            ctx.fillStyle = "red";
-            ctx.fillRect(-15, -10, 30, 20);
-            ctx.restore();
-        }
-        
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        gameLoop();
-    </script>
+  <script>
+    // Pobieramy element canvas i kontekst 2D
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    // Wyniki graczy
+    let playerScore = 0;
+    let aiScore = 0;
+
+    // Ustawienia paletek
+    const paddleWidth = 10;
+    const paddleHeight = 80;
+    const playerPaddle = {
+      x: 10,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight
+    };
+    const aiPaddle = {
+      x: canvas.width - paddleWidth - 10,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight
+    };
+
+    // Ustawienia piłki
+    const ballRadius = 8;
+    let ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: 4, // prędkość pozioma
+      vy: 2  // prędkość pionowa
+    };
+
+    // Obsługa ruchu myszy – sterowanie paletką gracza
+    canvas.addEventListener("mousemove", function(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = evt.clientY - rect.top;
+      playerPaddle.y = mouseY - paddleHeight / 2;
+      // Zapobieganie wychodzeniu paletki poza canvas
+      if (playerPaddle.y < 0) playerPaddle.y = 0;
+      if (playerPaddle.y + paddleHeight > canvas.height)
+        playerPaddle.y = canvas.height - paddleHeight;
+    });
+
+    // Funkcje pomocnicze do rysowania
+    function drawRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
+    }
+
+    function drawCircle(x, y, r, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawNet() {
+      for (let i = 0; i < canvas.height; i += 15) {
+        drawRect(canvas.width / 2 - 1, i, 2, 10, "#fff");
+      }
+    }
+
+    function drawText(text, x, y, color) {
+      ctx.fillStyle = color;
+      ctx.font = "32px Arial";
+      ctx.fillText(text, x, y);
+    }
+
+    // Resetowanie pozycji piłki po zdobyciu punktu
+    function resetBall() {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      // Zmiana kierunku piłki
+      ball.vx = -ball.vx;
+      ball.vy = 2 * (Math.random() > 0.5 ? 1 : -1);
+    }
+
+    // Aktualizacja stanu gry
+    function update() {
+      // Przemieszczanie piłki
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Odbijanie od góry i dołu
+      if (ball.y + ballRadius > canvas.height || ball.y - ballRadius < 0) {
+        ball.vy = -ball.vy;
+      }
+
+      // Sprawdzenie kolizji z paletkami
+      let paddle = ball.x < canvas.width / 2 ? playerPaddle : aiPaddle;
+      if (collision(ball, paddle)) {
+        // Obliczenie miejsca kolizji
+        let collidePoint = ball.y - (paddle.y + paddle.height / 2);
+        // Normalizacja wyniku (-1 do 1)
+        collidePoint = collidePoint / (paddle.height / 2);
+        // Maksymalny kąt odbicia (45°)
+        const angleRad = (Math.PI / 4) * collidePoint;
+        // Ustalenie kierunku
+        const direction = ball.x < canvas.width / 2 ? 1 : -1;
+        // Zmiana prędkości piłki
+        ball.vx = direction * 5 * Math.cos(angleRad);
+        ball.vy = 5 * Math.sin(angleRad);
+      }
+
+      // Aktualizacja ruchu paletki AI (proste sterowanie)
+      const aiCenter = aiPaddle.y + paddleHeight / 2;
+      if (ball.y < aiCenter - 35) {
+        aiPaddle.y -= 4;
+      } else if (ball.y > aiCenter + 35) {
+        aiPaddle.y += 4;
+      }
+      // Zapobieganie wychodzeniu AI poza canvas
+      if (aiPaddle.y < 0) aiPaddle.y = 0;
+      if (aiPaddle.y + paddleHeight > canvas.height)
+        aiPaddle.y = canvas.height - paddleHeight;
+
+      // Sprawdzanie zdobycia punktu
+      if (ball.x - ballRadius < 0) {
+        // AI zdobywa punkt
+        aiScore++;
+        resetBall();
+      } else if (ball.x + ballRadius > canvas.width) {
+        // Gracz zdobywa punkt
+        playerScore++;
+        resetBall();
+      }
+    }
+
+    // Funkcja sprawdzająca kolizję piłki z paletką
+    function collision(ball, paddle) {
+      return ball.x - ballRadius < paddle.x + paddle.width &&
+             ball.x + ballRadius > paddle.x &&
+             ball.y + ballRadius > paddle.y &&
+             ball.y - ballRadius < paddle.y + paddle.height;
+    }
+
+    // Rysowanie elementów gry
+    function render() {
+      // Czyścimy canvas
+      drawRect(0, 0, canvas.width, canvas.height, "#000");
+      // Rysujemy siatkę
+      drawNet();
+      // Rysujemy wyniki
+      drawText(playerScore, canvas.width / 4, canvas.height / 5, "#fff");
+      drawText(aiScore, 3 * canvas.width / 4, canvas.height / 5, "#fff");
+      // Rysujemy paletki
+      drawRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, "#fff");
+      drawRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height, "#fff");
+      // Rysujemy piłkę
+      drawCircle(ball.x, ball.y, ballRadius, "#fff");
+    }
+
+    // Główna pętla gry
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start gry
+    gameLoop();
+  </script>
 </body>
 </html>
