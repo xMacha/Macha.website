@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <title>O Mnie - Macha</title>
   <style>
-    /* Ustawienia ogólne */
+    /* Stylizacja całej strony */
     body {
       margin: 0;
       font-family: sans-serif;
-      background: #222;
+      /* Tło: ciemny gradient */
+      background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
       color: #eee;
-      /* Niestandardowy kursor – SVG z emotikoną "🖕" */
+      /* Niestandardowy kursor – SVG z emotikoną "środkowego palca" */
       cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
     }
     header, footer {
@@ -20,16 +21,65 @@
     main {
       padding: 20px;
       max-width: 900px;
-      margin: 0 auto;
+      margin: 20px auto;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
     }
-    a {
-      color: #0af;
-      text-decoration: none;
+    /* Stylizacja sekcji "O mnie" */
+    #about {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    a:hover {
-      text-decoration: underline;
+    .profile-img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      display: block;
+      margin: 0 auto 10px auto;
     }
-    /* Stylizacja elementu canvas dla gry Pong */
+    .media-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .media-buttons button {
+      background-color: #0af;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .media-buttons button:hover {
+      background-color: #09d;
+    }
+    /* Sekcja ustawień graczy */
+    #player-setup {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #player-setup input {
+      padding: 8px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #player-setup button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #0af;
+      color: #fff;
+    }
+    #player-setup button:hover {
+      background-color: #09d;
+    }
+    /* Stylizacja canvas z grą Pong */
     #pong {
       display: block;
       margin: 20px auto;
@@ -45,18 +95,25 @@
   <main>
     <!-- Sekcja "O mnie" -->
     <section id="about">
-      <p>
-        Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.
-      </p>
-      <ul>
-        <li>Email: <a href="mailto:piterek771@gmail.com">piterek771@gmail.com</a></li>
-        <li>GitHub: <a href="https://github.com/xMacha" target="_blank">https://github.com/xMacha</a></li>
-        <li>YouTube: <a href="https://www.youtube.com/@Macha_PL" target="_blank">https://www.youtube.com/@Macha_PL</a></li>
-      </ul>
+      <img src="https://i.redd.it/i-made-this-wallpapers-for-arch-linux-users-v0-cwa69paf49mb1.png?width=1920&format=png&auto=webp&s=cb817d9d3c6804580538c26281dd420ccf0095cb" alt="Macha Profile" class="profile-img">
+      <p>Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.</p>
+      <div class="media-buttons">
+        <button onclick="window.location.href='mailto:piterek771@gmail.com';">Email</button>
+        <button onclick="window.open('https://github.com/xMacha', '_blank');">GitHub</button>
+        <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank');">YouTube</button>
+      </div>
+    </section>
+
+    <!-- Sekcja ustawień graczy -->
+    <section id="player-setup">
+      <h2>Ustaw pseudonimy graczy</h2>
+      <input type="text" id="player1" placeholder="Pseudonim Gracza 1" value="Gracz 1">
+      <input type="text" id="player2" placeholder="Pseudonim Gracza 2" value="Gracz 2">
+      <button id="startGame">Rozpocznij grę</button>
     </section>
 
     <!-- Sekcja z grą Pong -->
-    <section id="game">
+    <section id="game" style="display:none;">
       <h2>Gra Pong</h2>
       <canvas id="pong" width="800" height="400"></canvas>
     </section>
@@ -66,24 +123,26 @@
   </footer>
 
   <script>
-    // Pobieramy element canvas i kontekst 2D
+    // Globalne zmienne gry
+    let playerScore = 0;
+    let player2Score = 0; // Wynik drugiego gracza
+    const paddleWidth = 10;
+    const paddleHeight = 80;
     const canvas = document.getElementById("pong");
     const ctx = canvas.getContext("2d");
 
-    // Wyniki graczy
-    let playerScore = 0;
-    let aiScore = 0;
+    // Pseudonimy graczy (domyślne wartości)
+    let player1Name = "Gracz 1";
+    let player2Name = "Gracz 2";
 
-    // Ustawienia paletek
-    const paddleWidth = 10;
-    const paddleHeight = 80;
+    // Paletki graczy
     const playerPaddle = {
       x: 10,
       y: canvas.height / 2 - paddleHeight / 2,
       width: paddleWidth,
       height: paddleHeight
     };
-    const aiPaddle = {
+    const player2Paddle = {
       x: canvas.width - paddleWidth - 10,
       y: canvas.height / 2 - paddleHeight / 2,
       width: paddleWidth,
@@ -95,19 +154,17 @@
     let ball = {
       x: canvas.width / 2,
       y: canvas.height / 2,
-      vx: 4, // prędkość pozioma
-      vy: 2  // prędkość pionowa
+      vx: 4,
+      vy: 2
     };
 
-    // Obsługa ruchu myszy – sterowanie paletką gracza
-    canvas.addEventListener("mousemove", function(evt) {
-      const rect = canvas.getBoundingClientRect();
-      const mouseY = evt.clientY - rect.top;
-      playerPaddle.y = mouseY - paddleHeight / 2;
-      // Zapobieganie wychodzeniu paletki poza canvas
-      if (playerPaddle.y < 0) playerPaddle.y = 0;
-      if (playerPaddle.y + paddleHeight > canvas.height)
-        playerPaddle.y = canvas.height - paddleHeight;
+    // Sterowanie – obiekt przechowujący naciśnięte klawisze
+    let keys = {};
+    document.addEventListener("keydown", function(event) {
+      keys[event.key] = true;
+    });
+    document.addEventListener("keyup", function(event) {
+      keys[event.key] = false;
     });
 
     // Funkcje pomocnicze do rysowania
@@ -132,7 +189,7 @@
 
     function drawText(text, x, y, color) {
       ctx.fillStyle = color;
-      ctx.font = "32px Arial";
+      ctx.font = "20px Arial";
       ctx.fillText(text, x, y);
     }
 
@@ -140,7 +197,6 @@
     function resetBall() {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
-      // Zmiana kierunku piłki
       ball.vx = -ball.vx;
       ball.vy = 2 * (Math.random() > 0.5 ? 1 : -1);
     }
@@ -151,46 +207,45 @@
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      // Odbijanie od góry i dołu
+      // Odbijanie piłki od góry i dołu
       if (ball.y + ballRadius > canvas.height || ball.y - ballRadius < 0) {
         ball.vy = -ball.vy;
       }
 
-      // Sprawdzenie kolizji z paletkami
-      let paddle = ball.x < canvas.width / 2 ? playerPaddle : aiPaddle;
+      // Ruch paletek sterowanych klawiaturą:
+      // Gracz 1: klawisze W (góra) i S (dół)
+      if (keys["w"] && playerPaddle.y > 0) {
+        playerPaddle.y -= 5;
+      }
+      if (keys["s"] && playerPaddle.y + paddleHeight < canvas.height) {
+        playerPaddle.y += 5;
+      }
+      // Gracz 2: strzałki góra i dół
+      if (keys["ArrowUp"] && player2Paddle.y > 0) {
+        player2Paddle.y -= 5;
+      }
+      if (keys["ArrowDown"] && player2Paddle.y + paddleHeight < canvas.height) {
+        player2Paddle.y += 5;
+      }
+
+      // Sprawdzenie kolizji piłki z paletkami
+      let paddle = ball.x < canvas.width / 2 ? playerPaddle : player2Paddle;
       if (collision(ball, paddle)) {
-        // Obliczenie miejsca kolizji
         let collidePoint = ball.y - (paddle.y + paddle.height / 2);
-        // Normalizacja wyniku (-1 do 1)
         collidePoint = collidePoint / (paddle.height / 2);
-        // Maksymalny kąt odbicia (45°)
         const angleRad = (Math.PI / 4) * collidePoint;
-        // Ustalenie kierunku
         const direction = ball.x < canvas.width / 2 ? 1 : -1;
-        // Zmiana prędkości piłki
         ball.vx = direction * 5 * Math.cos(angleRad);
         ball.vy = 5 * Math.sin(angleRad);
       }
 
-      // Aktualizacja ruchu paletki AI (proste sterowanie)
-      const aiCenter = aiPaddle.y + paddleHeight / 2;
-      if (ball.y < aiCenter - 35) {
-        aiPaddle.y -= 4;
-      } else if (ball.y > aiCenter + 35) {
-        aiPaddle.y += 4;
-      }
-      // Zapobieganie wychodzeniu AI poza canvas
-      if (aiPaddle.y < 0) aiPaddle.y = 0;
-      if (aiPaddle.y + paddleHeight > canvas.height)
-        aiPaddle.y = canvas.height - paddleHeight;
-
       // Sprawdzanie zdobycia punktu
       if (ball.x - ballRadius < 0) {
-        // AI zdobywa punkt
-        aiScore++;
+        // Gracz 2 zdobywa punkt
+        player2Score++;
         resetBall();
       } else if (ball.x + ballRadius > canvas.width) {
-        // Gracz zdobywa punkt
+        // Gracz 1 zdobywa punkt
         playerScore++;
         resetBall();
       }
@@ -210,12 +265,12 @@
       drawRect(0, 0, canvas.width, canvas.height, "#000");
       // Rysujemy siatkę
       drawNet();
-      // Rysujemy wyniki
-      drawText(playerScore, canvas.width / 4, canvas.height / 5, "#fff");
-      drawText(aiScore, 3 * canvas.width / 4, canvas.height / 5, "#fff");
+      // Rysujemy pseudonimy graczy i wyniki
+      drawText(player1Name + ": " + playerScore, canvas.width / 8, canvas.height / 8, "#fff");
+      drawText(player2Name + ": " + player2Score, 5 * canvas.width / 8, canvas.height / 8, "#fff");
       // Rysujemy paletki
       drawRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, "#fff");
-      drawRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height, "#fff");
+      drawRect(player2Paddle.x, player2Paddle.y, player2Paddle.width, player2Paddle.height, "#fff");
       // Rysujemy piłkę
       drawCircle(ball.x, ball.y, ballRadius, "#fff");
     }
@@ -227,8 +282,15 @@
       requestAnimationFrame(gameLoop);
     }
 
-    // Start gry
-    gameLoop();
+    // Obsługa przycisku "Rozpocznij grę"
+    document.getElementById("startGame").addEventListener("click", function() {
+      player1Name = document.getElementById("player1").value || "Gracz 1";
+      player2Name = document.getElementById("player2").value || "Gracz 2";
+      // Ukryj sekcję ustawień graczy i pokaż grę
+      document.getElementById("player-setup").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      gameLoop();
+    });
   </script>
 </body>
 </html>
