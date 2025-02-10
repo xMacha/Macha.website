@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Pong Multiplayer</title>
+  <style>
+    /* Podstawowa stylizacja strony */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
+      color: #eee;
+      /* Niestandardowy kursor – SVG z emotikoną "środkowego palca" */
+      cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
+      text-align: center;
+    }
+    #setup {
+      margin-top: 50px;
+    }
+    #setup input, #setup button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    #setup button {
+      background-color: #0af;
+      color: #fff;
+      cursor: pointer;
+    }
+    #setup button:hover {
+      background-color: #09d;
+    }
+    #pong {
+      display: none;
+      margin: 20px auto;
+      background: #000;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sekcja ustawień – podanie pseudonimu -->
+  <div id="setup">
+    <h1>Pong Multiplayer</h1>
+    <input type="text" id="nickname" placeholder="Twój pseudonim">
+    <button id="joinGame">Dołącz do gry</button>
+    <p id="status"></p>
+  </div>
 
+  <!-- Canvas z grą -->
+  <canvas id="pong" width="800" height="400"></canvas>
+
+  <!-- Dołączamy bibliotekę Socket.IO (dostępna dzięki serwerowi Express) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    let playerNumber = 0;   // numer przydzielony przez serwer (1 lub 2)
+    let gameId = "";
+    let gameState;
+
+    const setupDiv = document.getElementById("setup");
+    const statusP = document.getElementById("status");
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
+
+    // Po kliknięciu "Dołącz do gry" wysyłamy wiadomość do serwera
+    document.getElementById("joinGame").addEventListener("click", () => {
+      const nickname = document.getElementById("nickname").value || "Anon";
+      socket.emit("joinGame", { nickname: nickname });
+      statusP.textContent = "Łączenie z grą...";
+    });
+
+    // Informacja o oczekiwaniu na przeciwnika
+    socket.on("waiting", (data) => {
+      statusP.textContent = data.message;
+    });
+
+    // Otrzymujemy wiadomość o rozpoczęciu gry
+    socket.on("startGame", (data) => {
+      gameId = data.gameId;
+      playerNumber = data.player;
+      gameState = data.gameState;
+      setupDiv.style.display = "none";
+      canvas.style.display = "block";
+    });
+
+    // Aktualizacje stanu gry otrzymywane od serwera
+    socket.on("gameState", (state) => {
+      gameState = state;
+      drawGame();
+    });
+
+    // Obsługa zakończenia gry (np. gdy przeciwnik się rozłączy)
+    socket.on("gameOver", () => {
+      alert("Gra zakończona – jeden z graczy rozłączył się.");
+      location.reload();
+    });
+
+    // Funkcja rysująca elementy gry
+    function drawGame() {
+      // Tło
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Rysujemy siatkę
+      ctx.fillStyle = "#fff";
+      for (let i = 0; i < canvas.height; i += 15) {
+        ctx.fillRect(canvas.width / 2 - 1, i, 2, 10);
+      }
+      
+      // Paletki
+      ctx.fillRect(gameState.paddle1.x, gameState.paddle1.y, gameState.paddle1.width, gameState.paddle1.height);
+      ctx.fillRect(gameState.paddle2.x, gameState.paddle2.y, gameState.paddle2.width, gameState.paddle2.height);
+      
+      // Piłka
+      ctx.beginPath();
+      ctx.arc(gameState.ball.x, gameState.ball.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Wyniki i pseudonimy graczy
+      ctx.font = "20px Arial";
+      ctx.fillText(gameState.players[1] + ": " + gameState.score1, canvas.width / 8, 30);
+      ctx.fillText(gameState.players[2] + ": " + gameState.score2, 5 * canvas.width / 8, 30);
+    }
+
+    // Obsługa ruchu paletki – sterowanie odbywa się ruchem myszy po obszarze canvas
+    canvas.addEventListener("mousemove", (evt) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = evt.clientY - rect.top;
+      // Ustawiamy środek paletki na pozycji kursora (wysokość paletki = 80)
+      let y = mouseY - 40;
+      if (y < 0) y = 0;
+      if (y + 80 > canvas.height) y = canvas.height - 80;
+      // Wysyłamy aktualną pozycję paletki do serwera
+      socket.emit("paddleMove", { gameId: gameId, player: playerNumber, y: y });
+    });
+  </script>
+</body>
+</html>
