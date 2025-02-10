@@ -29,6 +29,29 @@
     a:hover {
       text-decoration: underline;
     }
+    /* Stylizacja zdjęcia profilowego */
+    #profile-pic {
+      display: block;
+      margin: 20px auto;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    /* Stylizacja przycisków w sekcji "O mnie" */
+    #buttons button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background: #0af;
+      color: #222;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #buttons button:hover {
+      background: #08c;
+    }
     /* Stylizacja elementu canvas dla gry Pong */
     #pong {
       display: block;
@@ -36,30 +59,36 @@
       background: #000;
       border: 2px solid #fff;
     }
-  </style>
+    /* Stylizacja suwaka trudności */
+    #difficulty-container {\n      text-align: center;\n      margin-bottom: 10px;\n    }\n    #difficulty-slider {\n      vertical-align: middle;\n    }\n  </style>
 </head>
 <body>
   <header>
     <h1>O Mnie - Macha</h1>
+    <img id="profile-pic" src="https://i.redd.it/i-made-this-wallpapers-for-arch-linux-users-v0-cwa69paf49mb1.png?width=1920&format=png&auto=webp&s=cb817d9d3c6804580538c26281dd420ccf0095cb" alt="Profilowe Macha">
   </header>
   <main>
     <!-- Sekcja "O mnie" -->
     <section id="about">
-      <p>
-        Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.
-      </p>
-      <ul>
-        <li>Email: <a href="mailto:piterek771@gmail.com">piterek771@gmail.com</a></li>
-        <li>GitHub: <a href="https://github.com/xMacha" target="_blank">https://github.com/xMacha</a></li>
-        <li>YouTube: <a href="https://www.youtube.com/@Macha_PL" target="_blank">https://www.youtube.com/@Macha_PL</a></li>
-      </ul>
+      <p>Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.</p>
+      <div id="buttons">
+        <button onclick="window.location.href='mailto:piterek771@gmail.com'">Email</button>
+        <button onclick="window.open('https://github.com/xMacha', '_blank')">GitHub</button>
+        <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank')">YouTube</button>
+      </div>
     </section>
 
     <!-- Sekcja z grą Pong -->
     <section id="game">
       <h2>Gra Pong</h2>
+      <div id="difficulty-container">
+        <label for="difficulty-slider">Trudność AI: </label>
+        <input type="range" id="difficulty-slider" min="1" max="10" value="3">
+      </div>
       <canvas id="pong" width="800" height="400"></canvas>
     </section>
+    <!-- Osadzenie muzyki z YouTube -->
+    <iframe width="0" height="0" src="https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls" frameborder="0" allow="autoplay"></iframe>
   </main>
   <footer>
     <p>&copy; 2025 Macha</p>
@@ -95,8 +124,8 @@
     let ball = {
       x: canvas.width / 2,
       y: canvas.height / 2,
-      vx: 4, // prędkość pozioma
-      vy: 2  // prędkość pionowa
+      vx: 4,
+      vy: 2
     };
 
     // Obsługa ruchu myszy – sterowanie paletką gracza
@@ -104,7 +133,6 @@
       const rect = canvas.getBoundingClientRect();
       const mouseY = evt.clientY - rect.top;
       playerPaddle.y = mouseY - paddleHeight / 2;
-      // Zapobieganie wychodzeniu paletki poza canvas
       if (playerPaddle.y < 0) playerPaddle.y = 0;
       if (playerPaddle.y + paddleHeight > canvas.height)
         playerPaddle.y = canvas.height - paddleHeight;
@@ -140,14 +168,12 @@
     function resetBall() {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
-      // Zmiana kierunku piłki
       ball.vx = -ball.vx;
       ball.vy = 2 * (Math.random() > 0.5 ? 1 : -1);
     }
 
     // Aktualizacja stanu gry
     function update() {
-      // Przemieszczanie piłki
       ball.x += ball.vx;
       ball.y += ball.vy;
 
@@ -159,44 +185,36 @@
       // Sprawdzenie kolizji z paletkami
       let paddle = ball.x < canvas.width / 2 ? playerPaddle : aiPaddle;
       if (collision(ball, paddle)) {
-        // Obliczenie miejsca kolizji
         let collidePoint = ball.y - (paddle.y + paddle.height / 2);
-        // Normalizacja wyniku (-1 do 1)
         collidePoint = collidePoint / (paddle.height / 2);
-        // Maksymalny kąt odbicia (45°)
         const angleRad = (Math.PI / 4) * collidePoint;
-        // Ustalenie kierunku
         const direction = ball.x < canvas.width / 2 ? 1 : -1;
-        // Zmiana prędkości piłki
-        ball.vx = direction * 5 * Math.cos(angleRad);
-        ball.vy = 5 * Math.sin(angleRad);
+        ball.vx = direction * 4.5 * Math.cos(angleRad);
+        ball.vy = 4.5 * Math.sin(angleRad);
       }
-
-      // Aktualizacja ruchu paletki AI (proste sterowanie)
-      const aiCenter = aiPaddle.y + paddleHeight / 2;
-      if (ball.y < aiCenter - 35) {
-        aiPaddle.y -= 4;
-      } else if (ball.y > aiCenter + 35) {
-        aiPaddle.y += 4;
-      }
-      // Zapobieganie wychodzeniu AI poza canvas
-      if (aiPaddle.y < 0) aiPaddle.y = 0;
-      if (aiPaddle.y + paddleHeight > canvas.height)
-        aiPaddle.y = canvas.height - paddleHeight;
 
       // Sprawdzanie zdobycia punktu
       if (ball.x - ballRadius < 0) {
-        // AI zdobywa punkt
         aiScore++;
         resetBall();
       } else if (ball.x + ballRadius > canvas.width) {
-        // Gracz zdobywa punkt
         playerScore++;
         resetBall();
       }
+
+      // Aktualizacja ruchu paletki AI z uwzględnieniem suwaka trudności
+      const aiSpeed = parseFloat(document.getElementById("difficulty-slider").value);
+      const aiCenter = aiPaddle.y + paddleHeight / 2;
+      if (ball.y < aiCenter - 40) {
+        aiPaddle.y -= aiSpeed;
+      } else if (ball.y > aiCenter + 40) {
+        aiPaddle.y += aiSpeed;
+      }
+      if (aiPaddle.y < 0) aiPaddle.y = 0;
+      if (aiPaddle.y + paddleHeight > canvas.height)
+        aiPaddle.y = canvas.height - paddleHeight;
     }
 
-    // Funkcja sprawdzająca kolizję piłki z paletką
     function collision(ball, paddle) {
       return ball.x - ballRadius < paddle.x + paddle.width &&
              ball.x + ballRadius > paddle.x &&
@@ -204,30 +222,22 @@
              ball.y - ballRadius < paddle.y + paddle.height;
     }
 
-    // Rysowanie elementów gry
     function render() {
-      // Czyścimy canvas
       drawRect(0, 0, canvas.width, canvas.height, "#000");
-      // Rysujemy siatkę
       drawNet();
-      // Rysujemy wyniki
       drawText(playerScore, canvas.width / 4, canvas.height / 5, "#fff");
       drawText(aiScore, 3 * canvas.width / 4, canvas.height / 5, "#fff");
-      // Rysujemy paletki
-      drawRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height, "#fff");
-      drawRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height, "#fff");
-      // Rysujemy piłkę
+      drawRect(playerPaddle.x, playerPaddle.y, paddleWidth, paddleHeight, "#fff");
+      drawRect(aiPaddle.x, aiPaddle.y, paddleWidth, paddleHeight, "#fff");
       drawCircle(ball.x, ball.y, ballRadius, "#fff");
     }
 
-    // Główna pętla gry
     function gameLoop() {
       update();
       render();
       requestAnimationFrame(gameLoop);
     }
 
-    // Start gry
     gameLoop();
   </script>
 </body>
