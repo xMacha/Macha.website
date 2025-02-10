@@ -4,34 +4,37 @@
   <meta charset="UTF-8">
   <title>O Mnie - Macha</title>
   <style>
-    /* Ustawienia ogólne */
-    body {
+    /* Reset i podstawowe style */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
       font-family: sans-serif;
       color: #eee;
-      /* Usuwamy statyczne tło, bo użyjemy pseudo-elementu do efektów */
-      /* cursor – niestandardowy kursor: */
+      background: url('zasoby/tlo.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      /* Ustawienie niestandardowego kursora */
       cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
     }
     
-    /* Pseudo-element z tłem i efektami */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('zasoby/tlo.png') no-repeat center center fixed;
-      background-size: cover;
-      filter: brightness(0.7) blur(2px);
-      z-index: -1;
-      animation: zoomBackground 20s ease-in-out infinite alternate;
+    /* Główny kontener – półprzezroczysty */
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 900px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+      animation: fadeIn 1s ease-out;
     }
     
-    @keyframes zoomBackground {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
     
     header, footer {
@@ -39,19 +42,20 @@
       padding: 20px;
     }
     
+    header h1 {
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 10px;
+      animation: slideDown 1s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
     main {
       padding: 20px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    
-    a {
-      color: #0af;
-      text-decoration: none;
-    }
-    
-    a:hover {
-      text-decoration: underline;
     }
     
     /* Stylizacja zdjęcia profilowego */
@@ -62,9 +66,15 @@
       height: 150px;
       object-fit: cover;
       border-radius: 50%;
+      border: 3px solid #0af;
+      transition: transform 0.3s ease;
     }
     
-    /* Stylizacja przycisków w sekcji "O mnie" */
+    #profile-pic:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Stylizacja przycisków */
     #buttons button {
       margin: 5px;
       padding: 10px 15px;
@@ -74,10 +84,22 @@
       font-weight: bold;
       border-radius: 4px;
       cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
     }
     
     #buttons button:hover {
       background: #08c;
+      transform: scale(1.05);
+    }
+    
+    /* Efekt "unoszenia" przycisków */
+    #buttons {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
     }
     
     /* Stylizacja elementu canvas dla gry Pong */
@@ -88,7 +110,7 @@
       border: 2px solid #fff;
     }
     
-    /* Stylizacja suwaka trudności */
+    /* Kontener suwaka trudności */
     #difficulty-container {
       text-align: center;
       margin-bottom: 10px;
@@ -97,41 +119,47 @@
     #difficulty-slider {
       vertical-align: middle;
     }
+    
+    footer p {
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>O Mnie - Macha</h1>
-    <img id="profile-pic" src="https://i.redd.it/i-made-this-wallpapers-for-arch-linux-users-v0-cwa69paf49mb1.png?width=1920&format=png&auto=webp&s=cb817d9d3c6804580538c26281dd420ccf0095cb" alt="Profilowe Macha">
-  </header>
-  <main>
-    <!-- Sekcja "O mnie" -->
-    <section id="about">
-      <p>Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.</p>
-      <div id="buttons">
-        <button onclick="window.location.href='mailto:piterek771@gmail.com'">Email</button>
-        <button onclick="window.open('https://github.com/xMacha', '_blank')">GitHub</button>
-        <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank')">YouTube</button>
-      </div>
-    </section>
-
-    <!-- Sekcja z grą Pong -->
-    <section id="game">
-      <h2>Gra Pong</h2>
-      <div id="difficulty-container">
-        <label for="difficulty-slider">Trudność AI: </label>
-        <input type="range" id="difficulty-slider" min="1" max="10" value="3">
-      </div>
-      <canvas id="pong" width="800" height="400"></canvas>
-    </section>
-    
-    <!-- Osadzenie muzyki z YouTube -->
-    <iframe width="0" height="0" src="https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls" frameborder="0" allow="autoplay"></iframe>
-  </main>
-  <footer>
-    <p>&copy; 2025 Macha</p>
-  </footer>
-
+  <!-- Osadzenie muzyki w tle (ukryte) -->
+  <iframe id="bg-music" width="0" height="0" src="https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls" frameborder="0" allow="autoplay"></iframe>
+  
+  <div class="container">
+    <header>
+      <h1>O Mnie - Macha</h1>
+      <img id="profile-pic" src="https://i.redd.it/i-made-this-wallpapers-for-arch-linux-users-v0-cwa69paf49mb1.png?width=1920&format=png&auto=webp&s=cb817d9d3c6804580538c26281dd420ccf0095cb" alt="Profilowe Macha">
+    </header>
+    <main>
+      <!-- Sekcja "O mnie" -->
+      <section id="about">
+        <p>Jestem Macha. Mam dużego kutacha. Lubię grać w komputer i use Arch btw.</p>
+        <div id="buttons">
+          <button onclick="window.location.href='mailto:piterek771@gmail.com'">Email</button>
+          <button onclick="window.open('https://github.com/xMacha', '_blank')">GitHub</button>
+          <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank')">YouTube</button>
+        </div>
+      </section>
+      
+      <!-- Sekcja z grą Pong -->
+      <section id="game">
+        <h2>Gra Pong</h2>
+        <div id="difficulty-container">
+          <label for="difficulty-slider">Trudność AI: </label>
+          <input type="range" id="difficulty-slider" min="1" max="10" value="3">
+        </div>
+        <canvas id="pong" width="800" height="400"></canvas>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2025 Macha</p>
+    </footer>
+  </div>
+  
   <script>
     // Pobieramy element canvas i kontekst 2D
     const canvas = document.getElementById("pong");
