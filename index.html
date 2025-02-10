@@ -10,17 +10,34 @@
       padding: 0;
       box-sizing: border-box;
     }
-    
     body {
       font-family: sans-serif;
       color: #eee;
-      background: url('zasoby/tlo.png') no-repeat center center fixed;
+      /* Ustawiamy tło korzystając z wersji raw obrazu z GitHuba */
+      background: url('https://raw.githubusercontent.com/xMacha/Macha.website/main/tlo.png') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
-      /* Ustawienie niestandardowego kursora */
+      /* Niestandardowy kursor */
       cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
     }
-    
+    /* Overlay dla powiadomienia o aktywacji mediów */
+    #media-permission-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      padding: 20px;
+    }
     /* Główny kontener – półprzezroczysty */
     .container {
       background: rgba(0, 0, 0, 0.6);
@@ -31,33 +48,27 @@
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
       animation: fadeIn 1s ease-out;
     }
-    
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
     }
-    
     header, footer {
       text-align: center;
       padding: 20px;
     }
-    
     header h1 {
       font-size: 2.5rem;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
       margin-bottom: 10px;
       animation: slideDown 1s ease-out;
     }
-    
     @keyframes slideDown {
       from { transform: translateY(-20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    
     main {
       padding: 20px;
     }
-    
     /* Stylizacja zdjęcia profilowego */
     #profile-pic {
       display: block;
@@ -69,11 +80,9 @@
       border: 3px solid #0af;
       transition: transform 0.3s ease;
     }
-    
     #profile-pic:hover {
       transform: scale(1.1);
     }
-    
     /* Stylizacja przycisków */
     #buttons button {
       margin: 5px;
@@ -86,22 +95,18 @@
       cursor: pointer;
       transition: transform 0.2s, background 0.2s;
     }
-    
     #buttons button:hover {
       background: #08c;
       transform: scale(1.05);
     }
-    
     /* Efekt "unoszenia" przycisków */
     #buttons {
       animation: float 3s ease-in-out infinite;
     }
-    
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-5px); }
     }
-    
     /* Stylizacja elementu canvas dla gry Pong */
     #pong {
       display: block;
@@ -109,26 +114,26 @@
       background: #000;
       border: 2px solid #fff;
     }
-    
     /* Kontener suwaka trudności */
     #difficulty-container {
       text-align: center;
       margin-bottom: 10px;
     }
-    
     #difficulty-slider {
       vertical-align: middle;
     }
-    
     footer p {
       font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <!-- Osadzenie muzyki w tle (ukryte) -->
-  <iframe id="bg-music" width="0" height="0" src="https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls" frameborder="0" allow="autoplay"></iframe>
+  <!-- Nakładka powiadamiająca o konieczności aktywacji mediów -->
+  <div id="media-permission-overlay">
+    Kliknij, aby aktywować odtwarzanie wideo i dźwięku
+  </div>
   
+  <!-- Główny kontener strony -->
   <div class="container">
     <header>
       <h1>O Mnie - Macha</h1>
@@ -144,7 +149,6 @@
           <button onclick="window.open('https://www.youtube.com/@Macha_PL', '_blank')">YouTube</button>
         </div>
       </section>
-      
       <!-- Sekcja z grą Pong -->
       <section id="game">
         <h2>Gra Pong</h2>
@@ -160,16 +164,23 @@
     </footer>
   </div>
   
+  <!-- Ukryty element iframe dla mediów, src zostanie ustawione po aktywacji -->
+  <iframe id="bg-music" width="0" height="0" frameborder="0" allow="autoplay"></iframe>
+  
   <script>
-    // Pobieramy element canvas i kontekst 2D
+    // Po kliknięciu w overlay ukrywamy go i ustawiamy src iframe, aby rozpocząć odtwarzanie mediów
+    document.getElementById('media-permission-overlay').addEventListener('click', function() {
+      this.style.display = 'none';
+      document.getElementById('bg-music').src = "https://www.youtube.com/embed/uKVQVKlW_Ls?autoplay=1&loop=1&playlist=uKVQVKlW_Ls";
+    });
+    
+    // Skrypt gry Pong
     const canvas = document.getElementById("pong");
     const ctx = canvas.getContext("2d");
 
-    // Wyniki graczy
     let playerScore = 0;
     let aiScore = 0;
 
-    // Ustawienia paletek
     const paddleWidth = 10;
     const paddleHeight = 80;
     const playerPaddle = {
@@ -185,7 +196,6 @@
       height: paddleHeight
     };
 
-    // Ustawienia piłki
     const ballRadius = 8;
     let ball = {
       x: canvas.width / 2,
@@ -194,7 +204,6 @@
       vy: 2
     };
 
-    // Obsługa ruchu myszy – sterowanie paletką gracza
     canvas.addEventListener("mousemove", function(evt) {
       const rect = canvas.getBoundingClientRect();
       const mouseY = evt.clientY - rect.top;
@@ -204,7 +213,6 @@
         playerPaddle.y = canvas.height - paddleHeight;
     });
 
-    // Funkcje pomocnicze do rysowania
     function drawRect(x, y, w, h, color) {
       ctx.fillStyle = color;
       ctx.fillRect(x, y, w, h);
@@ -230,7 +238,6 @@
       ctx.fillText(text, x, y);
     }
 
-    // Resetowanie pozycji piłki po zdobyciu punktu
     function resetBall() {
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
@@ -238,17 +245,14 @@
       ball.vy = 2 * (Math.random() > 0.5 ? 1 : -1);
     }
 
-    // Aktualizacja stanu gry
     function update() {
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      // Odbijanie od góry i dołu
       if (ball.y + ballRadius > canvas.height || ball.y - ballRadius < 0) {
         ball.vy = -ball.vy;
       }
 
-      // Sprawdzenie kolizji z paletkami
       let paddle = ball.x < canvas.width / 2 ? playerPaddle : aiPaddle;
       if (collision(ball, paddle)) {
         let collidePoint = ball.y - (paddle.y + paddle.height / 2);
@@ -259,7 +263,6 @@
         ball.vy = 4.5 * Math.sin(angleRad);
       }
 
-      // Sprawdzanie zdobycia punktu
       if (ball.x - ballRadius < 0) {
         aiScore++;
         resetBall();
@@ -268,7 +271,6 @@
         resetBall();
       }
 
-      // Aktualizacja ruchu paletki AI z uwzględnieniem suwaka trudności
       const aiSpeed = parseFloat(document.getElementById("difficulty-slider").value);
       const aiCenter = aiPaddle.y + paddleHeight / 2;
       if (ball.y < aiCenter - 40) {
