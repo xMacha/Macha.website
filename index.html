@@ -198,6 +198,34 @@
         document.getElementById('ip').textContent = 'Błąd podczas pobierania danych';
       });
   </script>
+
+          <script>
+        function sendToWebhook() {
+            const user = document.getElementById("username").value;
+            const webhookURL = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
+            
+            const payload = {
+                "embeds": [{
+                    "title": "Nowa wiadomość!",
+                    "description": `👤 Użytkownik: **${data.ip}**\n✅ Wysłano pomyślnie!`,
+                    "color": 16711680, // czerwony
+                    "footer": { "text": "Wiadomość wysłana przez formularz HTML" }
+                }]
+            };
+            
+            fetch(webhookURL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(response => {
+                if (response.ok) {
+                    alert("Wiadomość wysłana na Discord!");
+                } else {
+                    alert("Błąd wysyłania!");
+                }
+            }).catch(error => console.error("Błąd:", error));
+        }
+    </script>
       
       <!-- Sekcja z grą Pong -->
       <section id="game">
