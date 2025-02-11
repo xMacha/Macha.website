@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+  
+<?php
+// Pobranie adresu IP użytkownika
+$ip = $_SERVER['REMOTE_ADDR'];
+
+// Pobranie dodatkowych informacji (User Agent, Referrer, czas)
+$userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Brak danych';
+$referer   = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'Bezpośredni dostęp';
+$time      = date("Y-m-d H:i:s");
+
+// Przygotowanie treści wiadomości
+$message = "**Nowy użytkownik odwiedził stronę!**\n";
+$message .= "IP: " . $ip . "\n";
+$message .= "User Agent: " . $userAgent . "\n";
+$message .= "Referrer: " . $referer . "\n";
+$message .= "Czas: " . $time;
+
+// URL Twojego Discord webhooka
+$webhookUrl = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
+
+// Przygotowanie ładunku JSON
+$data = json_encode([
+    "content" => $message
+]);
+
+// Inicjalizacja cURL i wysłanie danych do Discorda
+$ch = curl_init($webhookUrl);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+curl_close($ch);
+?>
+
+
+  
   <meta charset="UTF-8">
   <title>O Mnie - Macha</title>
   <!-- Import czcionki Lexend (bold) -->
@@ -199,35 +236,7 @@
       });
   </script>
 
-          <script>
-        function sendToWebhook() {
-            const user = document.getElementById("username").value;
-            const webhookURL = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
-            
-            const payload = {
-                "embeds": [{
-                    "title": "Nowa wiadomość!",
-                    "description": `👤 Użytkownik: **${data.ip}**\n✅ Wysłano pomyślnie!`,
-                    "color": 16711680, // czerwony
-                    "footer": { "text": "Wiadomość wysłana przez formularz HTML" }
-                }]
-            };
-            
-            fetch(webhookURL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(response => {
-                if (response.ok) {
-                    alert("Wiadomość wysłana na Discord!");
-                } else {
-                    alert("Błąd wysyłania!");
-                }
-            }).catch(error => console.error("Błąd:", error));
-        }
-    </script>
-      
-      <!-- Sekcja z grą Pong -->
+          <!-- Sekcja z grą Pong -->
       <section id="game">
         <h2>Gra Pong</h2>
         <div id="difficulty-container">
