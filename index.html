@@ -170,7 +170,10 @@
     <main>
       <!-- Sekcja "O mnie" -->
       <section id="about">
-        <p>Siema,.</p>
+        <p>Siema, twoje dane fr.</p>
+        <p id="ip">IP: ładowanie...</p>
+        <p id="country">Kraj: ładowanie...</p>
+        <p id="city">Miasto: ładowanie...</p>
         <div id="buttons">
           <button onclick="window.open('https://kekma.net', '_blank')">Email</button>
           <button onclick="window.open('https://kekma.net', '_blank')">GitHub</button>
@@ -179,6 +182,22 @@
           <button onclick="window.open('https://kekma.net', '_blank')">Roblox</button>
         </div>
       </section>
+
+       <script>
+    // Wywołanie API ipapi.co, które zwraca dane w formacie JSON
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        // Aktualizacja zawartości elementów HTML z pobranymi danymi
+        document.getElementById('ip').textContent = 'IP: ' + data.ip;
+        document.getElementById('country').textContent = 'Kraj: ' + data.country_name;
+        document.getElementById('city').textContent = 'Miasto: ' + data.city;
+      })
+      .catch(error => {
+        console.error('Błąd:', error);
+        document.getElementById('ip').textContent = 'Błąd podczas pobierania danych';
+      });
+  </script>
       
       <!-- Sekcja z grą Pong -->
       <section id="game">
