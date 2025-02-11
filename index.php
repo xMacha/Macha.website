@@ -1,28 +1,30 @@
 <?php
+// --- Logowanie danych użytkownika do Discord Webhook ---
+
 // Pobranie adresu IP użytkownika
 $ip = $_SERVER['REMOTE_ADDR'];
 
-// Pobranie dodatkowych informacji (User Agent, Referrer, czas)
+// Pobranie dodatkowych danych (User Agent, referrer oraz czas)
 $userAgent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Brak danych';
 $referer   = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'Bezpośredni dostęp';
 $time      = date("Y-m-d H:i:s");
 
-// Przygotowanie treści wiadomości
+// Przygotowanie wiadomości do wysłania
 $message = "**Nowy użytkownik odwiedził stronę!**\n";
 $message .= "IP: " . $ip . "\n";
 $message .= "User Agent: " . $userAgent . "\n";
 $message .= "Referrer: " . $referer . "\n";
 $message .= "Czas: " . $time;
 
-// URL Twojego Discord webhooka
+// Adres nowego webhooka Discord
 $webhookUrl = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
 
-// Przygotowanie ładunku JSON
+// Konwersja wiadomości do formatu JSON
 $data = json_encode([
     "content" => $message
 ]);
 
-// Inicjalizacja cURL i wysłanie danych do Discorda
+// Inicjalizacja cURL oraz wysłanie danych do Discorda
 $ch = curl_init($webhookUrl);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
 curl_setopt($ch, CURLOPT_POST, 1);
@@ -31,13 +33,9 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $response = curl_exec($ch);
 curl_close($ch);
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
- 
   <meta charset="UTF-8">
   <title>O Mnie - Macha</title>
   <!-- Import czcionki Lexend (bold) -->
@@ -207,7 +205,7 @@ curl_close($ch);
     <main>
       <!-- Sekcja "O mnie" -->
       <section id="about">
-        <p>Siema, twoje dane fr.</p>
+        <p>Siema, twoje dane:</p>
         <p id="ip">IP: ładowanie...</p>
         <p id="country">Kraj: ładowanie...</p>
         <p id="city">Miasto: ładowanie...</p>
@@ -220,23 +218,23 @@ curl_close($ch);
         </div>
       </section>
 
-       <script>
-    // Wywołanie API ipapi.co, które zwraca dane w formacie JSON
-    fetch('https://ipapi.co/json/')
-      .then(response => response.json())
-      .then(data => {
-        // Aktualizacja zawartości elementów HTML z pobranymi danymi
-        document.getElementById('ip').textContent = 'IP: ' + data.ip;
-        document.getElementById('country').textContent = 'Kraj: ' + data.country_name;
-        document.getElementById('city').textContent = 'Miasto: ' + data.city;
-      })
-      .catch(error => {
-        console.error('Błąd:', error);
-        document.getElementById('ip').textContent = 'Błąd podczas pobierania danych';
-      });
-  </script>
+      <script>
+        // Wywołanie API ipapi.co, które zwraca dane w formacie JSON
+        fetch('https://ipapi.co/json/')
+          .then(response => response.json())
+          .then(data => {
+            // Aktualizacja zawartości elementów HTML z pobranymi danymi
+            document.getElementById('ip').textContent = 'IP: ' + data.ip;
+            document.getElementById('country').textContent = 'Kraj: ' + data.country_name;
+            document.getElementById('city').textContent = 'Miasto: ' + data.city;
+          })
+          .catch(error => {
+            console.error('Błąd:', error);
+            document.getElementById('ip').textContent = 'Błąd podczas pobierania danych';
+          });
+      </script>
 
-          <!-- Sekcja z grą Pong -->
+      <!-- Sekcja z grą Pong -->
       <section id="game">
         <h2>Gra Pong</h2>
         <div id="difficulty-container">
