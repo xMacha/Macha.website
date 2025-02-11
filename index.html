@@ -1,64 +1,433 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+ 
   <meta charset="UTF-8">
-  <title>Webhook Logger - GitHub Pages</title>
+  <title>O Mnie - Macha</title>
+  <!-- Import czcionki Lexend (bold) -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset i podstawowe style */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: sans-serif;
+      color: #eee;
+      /* Tło pobrane z GitHuba (raw link) */
+      background: url('https://raw.githubusercontent.com/xMacha/Macha.website/main/tlo.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      cursor: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%3E%3Ctext%20x='0'%20y='24'%20font-size='24'%3E%F0%9F%96%95%3C/text%3E%3C/svg%3E") 0 0, auto;
+    }
+    /* Overlay – powiadomienie o aktywacji mediów */
+    #media-permission-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      padding: 20px;
+    }
+    /* Główny kontener – półprzezroczysty */
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      margin: 20px auto;
+      padding: 20px;
+      max-width: 900px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+      animation: fadeIn 1s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    header, footer {
+      text-align: center;
+      padding: 20px;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      margin-bottom: 10px;
+      animation: slideDown 1s ease-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    main {
+      padding: 20px;
+    }
+    /* Opis – czcionka Lexend, bold, odstęp od przycisków */
+    #about p {
+      font-family: 'Lexend', sans-serif;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    /* Stylizacja zdjęcia profilowego – pulsacja zgodnie z „głośnością” utworu */
+    #profile-pic {
+      display: block;
+      margin: 20px auto;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid #0af;
+      transform: scale(1);
+      transition: transform 0.2s ease;
+    }
+    /* Stylizacja przycisków – odstęp od opisu */
+    #buttons {
+      margin-top: 10px;
+    }
+    #buttons button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background: #0af;
+      color: #222;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    #buttons button:hover {
+      background: #08c;
+      transform: scale(1.05);
+    }
+    /* Efekt unoszenia przycisków */
+    #buttons {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    /* Sekcja przycisku następnej piosenki */
+    #music-controls {
+      text-align: center;
+      margin-top: 15px;
+    }
+    #music-controls button {
+      margin: 5px;
+      padding: 10px 15px;
+      border: none;
+      background: #0af;
+      color: #222;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    #music-controls button:hover {
+      background: #08c;
+      transform: scale(1.05);
+    }
+    /* Stylizacja elementu canvas dla gry Pong */
+    #pong {
+      display: block;
+      margin: 20px auto;
+      background: #000;
+      border: 2px solid #fff;
+    }
+    /* Kontener suwaka trudności */
+    #difficulty-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #difficulty-slider {
+      vertical-align: middle;
+    }
+    footer p {
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-  <h1>Webhook Logger - Test</h1>
-  <p>Przykładowa strona wysyłająca dane do Discord Webhook.</p>
+  <!-- Overlay aktywujący odtwarzanie mediów -->
+  <div id="media-permission-overlay">
+    Kliknij, aby aktywować odtwarzanie wideo i dźwięku
+  </div>
+  
+  <!-- Główny kontener strony -->
+  <div class="container">
+    <header>
+      <h1>O Mnie - Macha</h1>
+      <img id="profile-pic" src="https://i.redd.it/i-made-this-wallpapers-for-arch-linux-users-v0-cwa69paf49mb1.png?width=1920&format=png&auto=webp&s=cb817d9d3c6804580538c26281dd420ccf0095cb" alt="Profilowe Macha">
+    </header>
+    <main>
+      <!-- Sekcja "O mnie" -->
+      <section id="about">
+        <p>Siema, twoje dane:.</p>
+        <p id="ip">IP: ładowanie...</p>
+        <p id="country">Kraj: ładowanie...</p>
+        <p id="city">Miasto: ładowanie...</p>
+        <div id="buttons">
+          <button onclick="window.open('https://kekma.net', '_blank')">Email</button>
+          <button onclick="window.open('https://kekma.net', '_blank')">GitHub</button>
+          <button onclick="window.open('https://kekma.net', '_blank')">YouTube</button>
+          <button onclick="window.open('https://kekma.net', '_blank')">Steam</button>
+          <button onclick="window.open('https://kekma.net', '_blank')">Roblox</button>
+        </div>
+      </section>
 
+       <script>
+    // Wywołanie API ipapi.co, które zwraca dane w formacie JSON
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        // Aktualizacja zawartości elementów HTML z pobranymi danymi
+        document.getElementById('ip').textContent = 'IP: ' + data.ip;
+        document.getElementById('country').textContent = 'Kraj: ' + data.country_name;
+        document.getElementById('city').textContent = 'Miasto: ' + data.city;
+      })
+      .catch(error => {
+        console.error('Błąd:', error);
+        document.getElementById('ip').textContent = 'Błąd podczas pobierania danych';
+      });
+  </script>
+
+          <!-- Sekcja z grą Pong -->
+      <section id="game">
+        <h2>Gra Pong</h2>
+        <div id="difficulty-container">
+          <label for="difficulty-slider">Trudność AI: </label>
+          <input type="range" id="difficulty-slider" min="1" max="10" value="3">
+        </div>
+        <canvas id="pong" width="800" height="400"></canvas>
+      </section>
+      
+      <!-- Kontrola zmiany piosenki -->
+      <section id="music-controls">
+        <button id="next-song">Następna piosenka</button>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2025 Macha</p>
+    </footer>
+  </div>
+  
+  <!-- Ukryty element iframe dla muzyki – src ustawiany po aktywacji -->
+  <iframe id="bg-music" width="0" height="0" frameborder="0" allow="autoplay"></iframe>
+  
   <script>
-    // Funkcja pobierająca dane IP oraz inne informacje użytkownika
-    // i wysyłająca je do Discord Webhook
-    function sendWebhook() {
-      // Pobieramy dane IP oraz lokalizację za pomocą API ipapi.co
-      fetch('https://ipapi.co/json/')
-        .then(response => response.json())
-        .then(data => {
-          const ip = data.ip;
-          const country = data.country_name;
-          const city = data.city;
-          const userAgent = navigator.userAgent;
-          const timestamp = new Date().toISOString();
+    /**********************
+     * USTAWIENIE MUZYKI *
+     **********************/
+    // Tablica utworów (identyfikatory YouTube) i indeks aktualnego utworu
+    const songs = ["-G2prPDrU5U", "TaPzISh5shw", "WmYMN3zSz70"];
+    let currentSongIndex = 0;
+    
+    // Ustawia src iframe z muzyką (autoplay + pętla)
+    function setSong(index) {
+      const videoId = songs[index];
+      const src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&loop=1&playlist=" + videoId;
+      document.getElementById("bg-music").src = src;
+    }
+    
+    // Po kliknięciu overlay aktywujemy media
+    document.getElementById('media-permission-overlay').addEventListener('click', function() {
+      this.style.display = 'none';
+      setSong(currentSongIndex);
+      // Po aktywacji, wyślij dane analityczne
+      sendAnalytics();
+    });
+    
+    // Obsługa przycisku "Następna piosenka"
+    document.getElementById("next-song").addEventListener("click", function() {
+      currentSongIndex = (currentSongIndex + 1) % songs.length;
+      setSong(currentSongIndex);
+    });
+    
+    /********************************************
+     * SYMULACJA REAKCJI PROFILOWEGO NA GŁOŚNOŚĆ *
+     ********************************************/
+    function simulateVolume() {
+      const t = Date.now() / 500; // regulacja prędkości pulsowania
+      const audioLevel = (Math.sin(t) + 1) / 2; // wartość 0-1
+      const scale = 1 + 0.1 * audioLevel; // skala od 1 do 1.1
+      document.getElementById('profile-pic').style.transform = 'scale(' + scale + ')';
+    }
+    setInterval(simulateVolume, 100);
+    
+    /****************************************
+     * WYSYŁANIE DANYCH ANALITYCZNYCH        *
+     ****************************************/
+    // Uwaga: Aby zapisywać dane na Google Drive, utwórz projekt w Google Apps Script,
+    // który zapisze odebrane dane do Google Sheet. Opublikuj go jako aplikację webową
+    // i podmień poniższy URL na swój własny endpoint.
+    const analyticsEndpoint = "https://script.google.com/macros/s/YourScriptID/exec"; // <-- podmień ten URL!
+    
+    // Funkcja zbierająca dane o odwiedzającym i wysyłająca je do Google Apps Script
+    function sendAnalytics() {
+      const data = {
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+        // Dodatkowo, na backendzie Google Apps Script można odczytać adres IP z obiektu request.
+      };
+      
+      // Wysyłamy dane metodą POST w formacie JSON
+      fetch(analyticsEndpoint, {
+        method: "POST",
+        mode: "no-cors", // Używamy no-cors, aby nie blokować żądania – uwaga: przy braku odpowiednich nagłówków
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      }).catch(error => {
+        console.error("Błąd wysyłania danych analitycznych:", error);
+      });
+    }
+    
+    /*********************
+     * SKRYPT GRY PONG   *
+     *********************/
+    const canvas = document.getElementById("pong");
+    const ctx = canvas.getContext("2d");
 
-          // Przygotowanie treści wiadomości
-          const message = `**Nowy użytkownik odwiedził stronę!**\n` +
-                          `IP: ${ip}\n` +
-                          `User Agent: ${userAgent}\n` +
-                          `Kraj: ${country}\n` +
-                          `Miasto: ${city}\n` +
-                          `Czas: ${timestamp}`;
+    let playerScore = 0;
+    let aiScore = 0;
 
-          // Adres Discord Webhook (upewnij się, że jest prawidłowy)
-          const webhookUrl = "https://discordapp.com/api/webhooks/1338865518135873537/3M6zHVt24Z5__4wfsz_7PQ43NVc1GHOPSD9aIlvlN7Cn78SEc3jUYEhUbjD0H70ReNqA";
+    const paddleWidth = 10;
+    const paddleHeight = 80;
+    const playerPaddle = {
+      x: 10,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight
+    };
+    const aiPaddle = {
+      x: canvas.width - paddleWidth - 10,
+      y: canvas.height / 2 - paddleHeight / 2,
+      width: paddleWidth,
+      height: paddleHeight
+    };
 
-          // Wysyłamy dane do Discord Webhook metodą POST
-          fetch(webhookUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ content: message })
-          })
-          .then(response => {
-            if (response.ok) {
-              console.log("Dane zostały wysłane do Discord Webhook.");
-            } else {
-              console.error("Błąd przy wysyłaniu danych do Discord Webhook.");
-            }
-          })
-          .catch(error => {
-            console.error("Błąd przy wysyłaniu żądania:", error);
-          });
-        })
-        .catch(error => {
-          console.error("Błąd przy pobieraniu danych IP:", error);
-        });
+    const ballRadius = 8;
+    let ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: 4,
+      vy: 2
+    };
+
+    canvas.addEventListener("mousemove", function(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = evt.clientY - rect.top;
+      playerPaddle.y = mouseY - paddleHeight / 2;
+      if (playerPaddle.y < 0) playerPaddle.y = 0;
+      if (playerPaddle.y + paddleHeight > canvas.height)
+        playerPaddle.y = canvas.height - paddleHeight;
+    });
+
+    function drawRect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, w, h);
     }
 
-    // Uruchomienie funkcji po załadowaniu strony
-    window.addEventListener("load", sendWebhook);
+    function drawCircle(x, y, r, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawNet() {
+      for (let i = 0; i < canvas.height; i += 15) {
+        drawRect(canvas.width / 2 - 1, i, 2, 10, "#fff");
+      }
+    }
+
+    function drawText(text, x, y, color) {
+      ctx.fillStyle = color;
+      ctx.font = "32px Arial";
+      ctx.fillText(text, x, y);
+    }
+
+    function resetBall() {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.vx = -ball.vx;
+      ball.vy = 2 * (Math.random() > 0.5 ? 1 : -1);
+    }
+
+    function update() {
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      if (ball.y + ballRadius > canvas.height || ball.y - ballRadius < 0) {
+        ball.vy = -ball.vy;
+      }
+
+      let paddle = ball.x < canvas.width / 2 ? playerPaddle : aiPaddle;
+      if (collision(ball, paddle)) {
+        let collidePoint = ball.y - (paddle.y + paddle.height / 2);
+        collidePoint = collidePoint / (paddle.height / 2);
+        const angleRad = (Math.PI / 4) * collidePoint;
+        const direction = ball.x < canvas.width / 2 ? 1 : -1;
+        ball.vx = direction * 4.5 * Math.cos(angleRad);
+        ball.vy = 4.5 * Math.sin(angleRad);
+      }
+
+      if (ball.x - ballRadius < 0) {
+        aiScore++;
+        resetBall();
+      } else if (ball.x + ballRadius > canvas.width) {
+        playerScore++;
+        resetBall();
+      }
+
+      const aiSpeed = parseFloat(document.getElementById("difficulty-slider").value);
+      const aiCenter = aiPaddle.y + paddleHeight / 2;
+      if (ball.y < aiCenter - 40) {
+        aiPaddle.y -= aiSpeed;
+      } else if (ball.y > aiCenter + 40) {
+        aiPaddle.y += aiSpeed;
+      }
+      if (aiPaddle.y < 0) aiPaddle.y = 0;
+      if (aiPaddle.y + paddleHeight > canvas.height)
+        aiPaddle.y = canvas.height - paddleHeight;
+    }
+
+    function collision(ball, paddle) {
+      return ball.x - ballRadius < paddle.x + paddle.width &&
+             ball.x + ballRadius > paddle.x &&
+             ball.y + ballRadius > paddle.y &&
+             ball.y - ballRadius < paddle.y + paddle.height;
+    }
+
+    function render() {
+      drawRect(0, 0, canvas.width, canvas.height, "#000");
+      drawNet();
+      drawText(playerScore, canvas.width / 4, canvas.height / 5, "#fff");
+      drawText(aiScore, 3 * canvas.width / 4, canvas.height / 5, "#fff");
+      drawRect(playerPaddle.x, playerPaddle.y, paddleWidth, paddleHeight, "#fff");
+      drawRect(aiPaddle.x, aiPaddle.y, paddleWidth, paddleHeight, "#fff");
+      drawCircle(ball.x, ball.y, ballRadius, "#fff");
+    }
+
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
